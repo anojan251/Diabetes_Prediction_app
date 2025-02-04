@@ -1,0 +1,43 @@
+<!-- templates/prediction_history.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prediction History</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-wrapper teal darken-1">
+            <a href="/" class="brand-logo center">Diabetes Prediction</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="/">Home</a></li>
+                <li><a href="/prediction_history">Prediction History</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h4 class="center-align">Prediction History</h4>
+        <ul class="collection">
+            {% if prediction_history %}
+                {% for entry in prediction_history %}
+                    <li class="collection-item">
+                        <strong>{{ entry.time }}</strong><br>
+                        {{ entry.prediction_message }}<br>
+                        <small>Confidence Score: {{ entry.confidence_score }}</small>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="collection-item">No prediction history available.</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <!-- Materialize JS for styling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>

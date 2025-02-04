@@ -1,0 +1,152 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Diabetes Prediction System</title>
+    <!-- Link to Materialize CSS for styling -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .btn {
+            width: 100%;
+        }
+        .loader {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-wrapper teal darken-1">
+            <a href="/" class="brand-logo center">Diabetes Prediction</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="/">Home</a></li>
+                {% if not session.get('user_id') %}
+                    <li><a href="/register">Register</a></li>
+                    <li><a href="/login">Login</a></li>
+                {% else %}
+                    <li><a href="/prediction_history">Prediction History</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if not session.get('user_id') %}
+            <!-- Content for Non-Logged-In Users -->
+            <div class="card-panel">
+                <h4 class="center-align">Welcome to the Diabetes Prediction System</h4>
+                <p>This application helps individuals assess their risk of diabetes based on various health indicators like blood glucose levels, blood pressure, BMI, and more. Our aim is to assist users in identifying potential health risks and encourage early intervention.</p>
+                <p>Please register or log in to use the prediction tool and keep track of your health history.</p>
+            </div>
+        {% else %}
+            <!-- Prediction Form for Logged-In Users -->
+            <div class="card">
+                <h4 class="center-align">Diabetes Prediction Form</h4>
+                <p class="center-align">Enter your details below to predict your risk of diabetes.</p>
+
+                <!-- Prediction Form -->
+                <form id="predictionForm" action="/predict" method="post">
+                    <div class="input-field">
+                        <input type="number" name="Pregnancies" step="any" id="pregnancies" required>
+                        <label for="pregnancies">Pregnancies</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="number" name="Glucose" step="any" id="glucose" required>
+                        <label for="glucose">Glucose</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="number" name="BloodPressure" step="any" id="bloodPressure" required>
+                        <label for="bloodPressure">Blood Pressure</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="number" name="SkinThickness" step="any" id="skinThickness" required>
+                        <label for="skinThickness">Skin Thickness</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="number" name="Insulin" step="any" id="insulin" required>
+                        <label for="insulin">Insulin</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="number" name="BMI" step="any" id="bmi" required>
+                        <label for="bmi">BMI</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="number" name="DiabetesPedigreeFunction" step="any" id="dpf" required>
+                        <label for="dpf">Diabetes Pedigree Function</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="number" name="Age" id="age" required>
+                        <label for="age">Age</label>
+                    </div>
+                    <button type="submit" class="btn waves-effect waves-light">Predict</button>
+                    <div class="progress loader">
+                        <div class="indeterminate"></div>
+                    </div>
+                </form>
+
+                <!-- Popup Modal for Result -->
+                <div id="resultModal" class="modal">
+                    <div class="modal-content">
+                        <h4>Prediction Result</h4>
+                        <p id="predictionText"></p>
+                        <p><strong>Confidence Score:</strong> <span id="confidenceScore"></span></p>
+                        <ul id="healthTips" class="collection"></ul>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Materialize JS and jQuery for form interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('label').addClass('active');
+            $('.modal').modal(); // Initialize the modal
+
+            $('#predictionForm').submit(function(event) {
+                event.preventDefault(); // Prevent form from redirecting
+                $('.loader').show(); // Show loader on form submission
+
+                // AJAX call to submit form without refreshing page
+                $.ajax({
+                    url: '/predict',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('.loader').hide();
+                        $('#predictionText').text(response.predictionMessage);
+                        $('#confidenceScore').text(response.confidenceScore);
+
+                        // Display health tips
+                        $('#healthTips').empty(); // Clear previous tips
+                        response.healthTips.forEach(function(tip) {
+                            $('#healthTips').append('<li class="collection-item">' + tip + '</li>');
+                        });
+
+                        $('#resultModal').modal('open'); // Open modal
+                        setTimeout(function() {
+                            $('#resultModal').modal('close'); // Close modal after 5 seconds
+                        }, 5000);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
