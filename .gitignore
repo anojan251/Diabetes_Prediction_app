@@ -1,6 +1,6 @@
 venv/
 __pycache__/
 *.pyc
-*.pkl
+#*.pkl
 *.env
 *.DS_Store
